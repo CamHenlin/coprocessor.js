@@ -13,7 +13,7 @@ The intended purpose is writing interesting Internet-connected software for anci
 ### Here's my reasoning:
 Many machines are simply not powerful enough to get on the Internet or perform intensive operations. Even if you somehow get them connected via an old modem, the software is a compromise, the SSL is nonexistent because the machines are too slow, etc - the list of problems goes on and on.
 
-But old machines almost universally have a serial port or some kind of serial interface. Furthermore, the ports are fast enough to operate on relatively large quantities of plain text, even at 9600kbps. Why not provide a simple batch execution system over the serial port?
+But old machines almost universally have a serial port or some kind of serial interface. Furthermore, the ports are fast enough to operate on relatively large quantities of plain text, even at 9600bps. Why not provide a simple batch execution system over the serial port?
 
 Sure, *old* Internet-connected apps still won't work using this strategy, but we could write new ones, with a new environment, with lots of packages already available, and all we need is a serial cable that can connect to our old computer and our new computer at both ends - no fancy modems or anything.
 
