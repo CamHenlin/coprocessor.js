@@ -8,7 +8,7 @@ const port = new SerialPort(process.env.SERIAL_PORT || '/dev/ttys000', {
 })
 
 const DELIMETER = `;;;`
-const FILE_OR_FUNCTION_DELIMETER = `%%%`
+const FILE_OR_FUNCTION_DELIMETER = `&&&`
 const FILE_META_DELIMETER = `@@@`
 const log = console.log
 
@@ -229,11 +229,11 @@ port.on('error', function(err) {
 })
 
 // NOTE! escaping strings within strings will break things, don't do that for now
-// NOTE! avoid the use of ;;;, %%%, @@@ - those are internally-used delimeters
+// NOTE! avoid the use of ;;;, &&&, @@@ - those are internally-used delimeters
 // const TEST_INDEX = `const _ = require('lodash')\nclass SimpleNodeThing {\n  static isEmpty (variable) {\n    return _.isEmpty(variable)\n  }\n  isEmpty (variable) {\n    return this.constructor.isEmpty(variable)\n  }\n}\nmodule.exports = SimpleNodeThing`
 // const TEST_PACKAGE = `{\n  "name": "test",\n  "version": "1.0.0",\n  "description": "",\n  "main": "index.js",\n  "scripts": {\n    "test": ""\n  },\n  "author": "",\n  "license": "ISC",\n  "dependencies": {\n    "lodash": "^4.17.21"\n  }\n}`
-// const TEST_APP_INSTANTIATION = `TEST_APPLICATION_ID;;;TEST_CALL_ID_1;;;PROGRAM;;;index.js@@@${TEST_INDEX}%%%package.json@@@${TEST_PACKAGE}`
-// const TEST_APP_FUNCTION_CALL = `TEST_APPLICATION_ID;;;TEST_CALL_ID_2;;;FUNCTION;;;isEmpty%%%test`
+// const TEST_APP_INSTANTIATION = `TEST_APPLICATION_ID;;;TEST_CALL_ID_1;;;PROGRAM;;;index.js@@@${TEST_INDEX}&&&package.json@@@${TEST_PACKAGE}`
+// const TEST_APP_FUNCTION_CALL = `TEST_APPLICATION_ID;;;TEST_CALL_ID_2;;;FUNCTION;;;isEmpty&&&test`
 // const TEST_APP_EVAL_CALL = `TEST_APPLICATION_ID;;;TEST_CALL_ID_3;;;EVAL;;;console.log(this)`
 
 // handleData(TEST_APP_INSTANTIATION)
