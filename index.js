@@ -2,8 +2,16 @@ const SerialPort = require('serialport')
 const fs = require('fs').promises
 const rimraf = require('rimraf');
 const { spawn } = require('child_process')
+const Delimiter = SerialPort.parsers.Delimiter
 
-const port = new SerialPort(process.env.SERIAL_PORT || '/dev/ttys000', {
+const MESSAGE_DELIMITER = `;;@@&&`
+const parser = new Delimiter({
+  delimiter: MESSAGE_DELIMITER,
+  includeDelimiter: false
+})
+
+const SERIAL_PORT = process.env.SERIAL_PORT || '/dev/ttys000'
+const port = new SerialPort(SERIAL_PORT, {
   baudRate: 9600
 })
 
@@ -19,7 +27,7 @@ const writeData = (data) => {
   log(`writeData:`)
   log(data)
 
-  port.write(data)
+  //port.write(data)
 }
 
 // data will be handled in 3 parts, split by DELIMETER
@@ -37,6 +45,24 @@ const writeData = (data) => {
 //      it will be written back over the serial port
 // the third part will be passed to the specific handler from part 3
 const handleData = (data) => {
+
+  if (!data) {
+
+    writeData(`FAILURE;;;NO DATA;;;${data}`)
+
+    return
+  }
+
+  if (!data.split) {
+
+    writeData(`FAILURE;;;MALFORMED DATA - SPLIT NOT AVAILABLE;;;${data}`)
+
+    console.log(data)
+    console.log(typeof data)
+    console.log(`"${data}"`)
+
+    return
+  }
 
   const splitData = data.split(DELIMETER)
 
@@ -210,16 +236,34 @@ const instantiateProgram = async (APPLICATION_ID, CALL_ID, OPERAND) => {
   return runApplication(APPLICATION_ID, CALL_ID)
 }
 
-// Read data that is available but keep the stream in "paused mode"
-port.on('readable', function () {
+// // Read data that is available but keep the stream in "paused mode"
+// // this results in char by char buffers being read in
+// port.on('readable', function () {
 
-  console.log('Data:', port.read())
-})
+//   console.log('Data:', port.read())
+// })
+
+// port.on('open', function () {
+
+//   console.log('port is open')
+//   //port.write('coprocessor: port is open')
+// })
 
 // Switches the port into "flowing mode"
-port.on('data', function (data) {
+// port.on('data', function (data) {
 
-  handleData(data)
+//   console.log(`PORT DATA:`)
+//   console.log(data)
+//   handleData(data)
+// })
+
+port.pipe(parser)
+
+parser.on('data', function (data) {
+
+  // console.log(`PORT DATA LINE:`)
+  // console.log(data)
+  handleData(new String(data))
 })
 
 // Open errors will be emitted as an error event
@@ -228,6 +272,7 @@ port.on('error', function(err) {
   console.log('Error: ', err.message)
 })
 
+console.log(`instantiated program, waiting for data on ${SERIAL_PORT}`)
 // NOTE! escaping strings within strings will break things, don't do that for now
 // NOTE! avoid the use of ;;;, &&&, @@@ - those are internally-used delimeters
 // const TEST_INDEX = `const _ = require('lodash')\nclass SimpleNodeThing {\n  static isEmpty (variable) {\n    return _.isEmpty(variable)\n  }\n  isEmpty (variable) {\n    return this.constructor.isEmpty(variable)\n  }\n}\nmodule.exports = SimpleNodeThing`
