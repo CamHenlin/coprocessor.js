@@ -27,7 +27,7 @@ const writeData = (data) => {
   log(`writeData:`)
   log(data)
 
-  //port.write(data)
+  port.write(data)
 }
 
 // data will be handled in 3 parts, split by DELIMETER
@@ -48,14 +48,14 @@ const handleData = (data) => {
 
   if (!data) {
 
-    writeData(`FAILURE;;;NO DATA;;;${data}`)
+    writeData(`FAILURE;;;NO DATA;;;${data}${MESSAGE_DELIMITER}`)
 
     return
   }
 
   if (!data.split) {
 
-    writeData(`FAILURE;;;MALFORMED DATA - SPLIT NOT AVAILABLE;;;${data}`)
+    writeData(`FAILURE;;;MALFORMED DATA - SPLIT NOT AVAILABLE;;;${data}${MESSAGE_DELIMITER}`)
 
     console.log(data)
     console.log(typeof data)
@@ -69,7 +69,7 @@ const handleData = (data) => {
   // avoid doing anything with malformed data for now
   if (splitData.length !== 4) {
 
-    writeData(`FAILURE;;;MALFORMED DATA`)
+    writeData(`FAILURE;;;MALFORMED DATA${MESSAGE_DELIMITER}`)
 
     return
   }
@@ -95,7 +95,7 @@ const handleData = (data) => {
 
     default:
 
-      writeData(`${APPLICATION_ID};;;${CALL_ID};;;${OPERATION};;;FAILURE;;;MALFORMED OPERATION`)
+      writeData(`${APPLICATION_ID};;;${CALL_ID};;;${OPERATION};;;FAILURE;;;MALFORMED OPERATION${MESSAGE_DELIMITER}`)
 
       return
   }
@@ -107,7 +107,7 @@ const evalOperand = async (APPLICATION_ID, CALL_ID, OPERAND) => {
 
   if (!applicationContexts[APPLICATION_ID]) {
 
-    writeData(`${APPLICATION_ID};;;${CALL_ID};;;EVAL;;;FAILURE;;;APPLICATION NOT INSTANTIATED`)
+    writeData(`${APPLICATION_ID};;;${CALL_ID};;;EVAL;;;FAILURE;;;APPLICATION NOT INSTANTIATED${MESSAGE_DELIMITER}`)
 
     return
   }
@@ -117,7 +117,7 @@ const evalOperand = async (APPLICATION_ID, CALL_ID, OPERAND) => {
     return await eval(str)
   }.call(applicationContexts[APPLICATION_ID], OPERAND)
 
-  writeData(`${APPLICATION_ID};;;${CALL_ID};;;EVAL;;;SUCCESS;;;${returnValue}`)
+  writeData(`${APPLICATION_ID};;;${CALL_ID};;;EVAL;;;SUCCESS;;;${returnValue}${MESSAGE_DELIMITER}`)
 
   return
 }
@@ -129,21 +129,21 @@ const runFunction = async (APPLICATION_ID, CALL_ID, OPERAND) => {
 
   if (!applicationContexts[APPLICATION_ID]) {
 
-    writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;${FUNCTION};;;FAILURE;;;APPLICATION NOT INSTANTIATED`)
+    writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;FAILURE;;;APPLICATION NOT INSTANTIATED${MESSAGE_DELIMITER}`)
 
     return
   }
 
   if (!applicationContexts[APPLICATION_ID][FUNCTION]) {
 
-    writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;${FUNCTION};;;FAILURE;;;FUNCTION NOT FOUND ON APPLICATION`)
+    writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;FAILURE;;;FUNCTION NOT FOUND ON APPLICATION${MESSAGE_DELIMITER}`)
 
     return
   }
 
   const returnValue = await applicationContexts[APPLICATION_ID][FUNCTION](...splitOperand)
 
-  writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;${FUNCTION};;;SUCCESS;;;${returnValue}`)
+  writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;SUCCESS;;;${returnValue}${MESSAGE_DELIMITER}`)
 
   return
 }
@@ -193,14 +193,14 @@ const runApplication = async (APPLICATION_ID, CALL_ID) => {
     applicationContext = new application()
   } catch (err) {
 
-    writeData(`${APPLICATION_ID};;;${CALL_ID};;;PROGRAM;;;FAILURE;;;runApplication:${err.message}`)
+    writeData(`${APPLICATION_ID};;;${CALL_ID};;;PROGRAM;;;FAILURE;;;runApplication:${err.message}${MESSAGE_DELIMITER}`)
 
     return
   }
 
   applicationContexts[APPLICATION_ID] = applicationContext
 
-  writeData(`${APPLICATION_ID};;;${CALL_ID};;;PROGRAM;;;SUCCESS`)
+  writeData(`${APPLICATION_ID};;;${CALL_ID};;;PROGRAM;;;SUCCESS;;;SUCCESS${MESSAGE_DELIMITER}`)
 
   return
 }
