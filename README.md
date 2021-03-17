@@ -1,5 +1,7 @@
 # coprocessor.js
 
+TODO: docs already slightly out of date - this works now! update docs to explain how to use
+
 ## What is this?
 Coprocessor.js is a serial-based, nodejs-backed, remote code execution system. Coprocessor allows remote users connected via serial cable to send JavaScript packages over that serial port, and then interact with those packages via function calls or evaluations. This allows all development to stay on the remote side of the serial port.
 
