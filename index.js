@@ -152,15 +152,20 @@ const createDirectoryForApplication = async (APPLICATION_ID) => {
 
   await new Promise((resolve) => {
 
-    return rimraf(`./${APPLICATION_ID}`, resolve);
+    return rimraf(`${__dirname}/${APPLICATION_ID}`, resolve);
   })
 
-  await fs.mkdir(`./${APPLICATION_ID}`)
+  await fs.mkdir(`${__dirname}/${APPLICATION_ID}`)
 }
 
 const createFileForApplication = async (APPLICATION_ID, fileName, fileText) => {
 
-  await fs.writeFile(`./${APPLICATION_ID}/${fileName}`, fileText)
+  console.log(`fileName`)
+  console.log(fileName)
+  console.log(`fileText`)
+  console.log(fileText)
+
+  await fs.writeFile(`${__dirname}/${APPLICATION_ID}/${fileName.trim()}`, fileText)
 }
 
 const runNpmInstallForApplication = async (APPLICATION_ID) => {
@@ -205,33 +210,37 @@ const runApplication = async (APPLICATION_ID, CALL_ID) => {
   return
 }
 
+const checkIfProgramAlreadyExists = async (APPLICATION_ID) => {
+  
+}
+
 // set up all of the directories and files sent across the serial port, run an npm install, then run the application
 // NOTE! need to document what an "application" must look like and the restrictions on it
 // NOTE! need to provide an example "application"
 const instantiateProgram = async (APPLICATION_ID, CALL_ID, OPERAND) => {
 
-  try {
+  // try {
 
-    await createDirectoryForApplication(APPLICATION_ID)
+  //   await createDirectoryForApplication(APPLICATION_ID)
 
-    const applicationFiles = OPERAND.split(FILE_OR_FUNCTION_DELIMETER)
+  //   const applicationFiles = OPERAND.split(FILE_OR_FUNCTION_DELIMETER)
 
-    for (const applicationFileParts of applicationFiles) {
+  //   for (const applicationFileParts of applicationFiles) {
 
-      const applicationMeta = applicationFileParts.split(FILE_META_DELIMETER)
-      const fileName = applicationMeta[0]
-      const fileText = applicationMeta[1]
+  //     const applicationMeta = applicationFileParts.split(FILE_META_DELIMETER)
+  //     const fileName = applicationMeta[0]
+  //     const fileText = applicationMeta[1]
 
-      await createFileForApplication(APPLICATION_ID, fileName, fileText)
-    }
+  //     await createFileForApplication(APPLICATION_ID, fileName, fileText)
+  //   }
 
-    await runNpmInstallForApplication(APPLICATION_ID)
-  } catch (err) {
+  //   await runNpmInstallForApplication(APPLICATION_ID)
+  // } catch (err) {
 
-    writeData(`${APPLICATION_ID};;;${CALL_ID};;;PROGRAM;;;FAILURE;;;instantiateProgram:${err.message}`)
+  //   writeData(`${APPLICATION_ID};;;${CALL_ID};;;PROGRAM;;;FAILURE;;;instantiateProgram:${err.message}`)
 
-    return
-  }
+  //   return
+  // }
 
   return runApplication(APPLICATION_ID, CALL_ID)
 }
