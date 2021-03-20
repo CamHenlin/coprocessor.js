@@ -109,3 +109,35 @@ TODO: provide a better example
 
 ## What's next
 This seems to work fine on a local test machine accepting fake commands at the bottom of `index.js`. Next step is to provide operational examples on the Retro68 side, then create a simple interaction library there.
+
+
+# Additional note about tty0tty for local testing
+copied from: https://www.sagunpandey.com/2016/02/setup-virtual-serial-ports-using-tty0tty-in-linux/
+Installing tty0tty:
+
+Download the tty0tty package from one of these sources:
+1.1 http://sourceforge.net/projects/tty0tty/files/
+1.2 clone the repo https://github.com/freemed/tty0tty
+Extract it
+2.1 tar xf tty0tty-1.2.tgz
+Build the kernel module from provided source
+3.1 cd tty0tty-1.2/module
+3.2 make
+Copy the new kernel module into the kernel modules directory
+4.1 sudo cp tty0tty.ko /lib/modules/$(uname -r)/kernel/drivers/misc/
+Load the module
+5.1 sudo depmod
+5.2 sudo modprobe tty0tty
+5.3 You should see new serial port/libs in /dev/ (ls /dev/tnt*)
+Give appropriate permissions to the new serial ports
+6.1 sudo chmod 666 /dev/tnt*
+You can now access the serial ports as /dev/tnt0 (1,2,3,4 etc)
+
+Note that the consecutive ports are interconnected. For example, /dev/tnt0 and /dev/tnt1 are connected as if using a direct cable.
+
+Persisting across boot:
+
+Edit the file /etc/modules (Debian) or /etc/modules.conf and add the following line:
+tty0tty
+
+Note that this method will not make the module persist over kernel updates so if you ever update your kernel, make sure you build tty0tty again and repeat the process.

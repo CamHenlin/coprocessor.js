@@ -5,6 +5,11 @@ const { spawn } = require('child_process')
 const Delimiter = SerialPort.parsers.Delimiter
 
 const MESSAGE_DELIMITER = `;;@@&&`
+const INNER_MESSAGE_DELIMITER = `;;;`
+const MESSAGE_DELIMITER_REGEX = /;;@@&&/g
+const INNER_MESSAGE_DELIMITER_REGEX = /;;;/g
+const REPLACEMENT_MESSAGE = `REPLACED_COPROCESSOR_MESSAGE_DELIMETER`
+const INNER_REPLACEMENT_MESSAGE = `REPLACED_COPROCESSOR_INNER_MESSAGE_DELIMETER`
 const parser = new Delimiter({
   delimiter: MESSAGE_DELIMITER,
   includeDelimiter: false
@@ -24,10 +29,12 @@ let applicationContexts = {}
 
 const writeData = (data) => {
 
-  log(`writeData:`)
-  log(data)
+  // log(`writeData:`)
+  // log(data)
+  try {
 
-  port.write(data)
+    port.write(data)
+  } catch (err) {}
 }
 
 // data will be handled in 3 parts, split by DELIMETER
@@ -57,9 +64,9 @@ const handleData = (data) => {
 
     writeData(`FAILURE;;;MALFORMED DATA - SPLIT NOT AVAILABLE;;;${data}${MESSAGE_DELIMITER}`)
 
-    console.log(data)
-    console.log(typeof data)
-    console.log(`"${data}"`)
+    // console.log(data)
+    // console.log(typeof data)
+    // console.log(`"${data}"`)
 
     return
   }
@@ -103,6 +110,11 @@ const handleData = (data) => {
   return
 }
 
+const cleanReturnValue = (returnValue) => {
+
+  return returnValue.replace(MESSAGE_DELIMITER_REGEX, REPLACEMENT_MESSAGE).replace(INNER_MESSAGE_DELIMITER_REGEX, INNER_REPLACEMENT_MESSAGE)
+}
+
 const evalOperand = async (APPLICATION_ID, CALL_ID, OPERAND) => {
 
   if (!applicationContexts[APPLICATION_ID]) {
@@ -112,10 +124,12 @@ const evalOperand = async (APPLICATION_ID, CALL_ID, OPERAND) => {
     return
   }
 
-  const returnValue = await async function (str) {
+  let returnValue = await async function (str) {
 
     return await eval(str)
   }.call(applicationContexts[APPLICATION_ID], OPERAND)
+
+  returnValue = cleanReturnValue(returnValue)
 
   writeData(`${APPLICATION_ID};;;${CALL_ID};;;EVAL;;;SUCCESS;;;${returnValue}${MESSAGE_DELIMITER}`)
 
@@ -141,7 +155,9 @@ const runFunction = async (APPLICATION_ID, CALL_ID, OPERAND) => {
     return
   }
 
-  const returnValue = await applicationContexts[APPLICATION_ID][FUNCTION](...splitOperand)
+  let returnValue = await applicationContexts[APPLICATION_ID][FUNCTION](...splitOperand)
+
+  returnValue = cleanReturnValue(returnValue)
 
   writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;SUCCESS;;;${returnValue}${MESSAGE_DELIMITER}`)
 
@@ -152,15 +168,20 @@ const createDirectoryForApplication = async (APPLICATION_ID) => {
 
   await new Promise((resolve) => {
 
-    return rimraf(`./${APPLICATION_ID}`, resolve);
+    return rimraf(`${__dirname}/${APPLICATION_ID}`, resolve);
   })
 
-  await fs.mkdir(`./${APPLICATION_ID}`)
+  await fs.mkdir(`${__dirname}/${APPLICATION_ID}`)
 }
 
 const createFileForApplication = async (APPLICATION_ID, fileName, fileText) => {
 
-  await fs.writeFile(`./${APPLICATION_ID}/${fileName}`, fileText)
+  // console.log(`fileName`)
+  // console.log(fileName)
+  // console.log(`fileText`)
+  // console.log(fileText)
+
+  await fs.writeFile(`${__dirname}/${APPLICATION_ID}/${fileName.trim()}`, fileText)
 }
 
 const runNpmInstallForApplication = async (APPLICATION_ID) => {
@@ -203,6 +224,16 @@ const runApplication = async (APPLICATION_ID, CALL_ID) => {
   writeData(`${APPLICATION_ID};;;${CALL_ID};;;PROGRAM;;;SUCCESS;;;SUCCESS${MESSAGE_DELIMITER}`)
 
   return
+}
+
+// TODO, could be used to avoid unnecessary program sends/npm installs
+const checkIfProgramAlreadyExists = async (APPLICATION_ID) => {
+  
+}
+
+// TODO, could be used to avoid unnecessary program sends/npm installs
+const runProgramIfAlreadyExists = async (APPLICATION_ID) => {
+  
 }
 
 // set up all of the directories and files sent across the serial port, run an npm install, then run the application
