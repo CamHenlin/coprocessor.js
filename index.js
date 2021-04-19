@@ -17,7 +17,7 @@ const parser = new Delimiter({
 
 const SERIAL_PORT = process.env.SERIAL_PORT || '/dev/ttys000'
 const port = new SerialPort(SERIAL_PORT, {
-  baudRate: 9600
+  baudRate: 19200
 })
 
 const DELIMETER = `;;;`
