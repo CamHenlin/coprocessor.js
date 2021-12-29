@@ -17,7 +17,7 @@ const parser = new Delimiter({
 
 const SERIAL_PORT = process.env.SERIAL_PORT || '/dev/ttys000'
 const port = new SerialPort(SERIAL_PORT, {
-  baudRate: 19200
+  baudRate: 28800
 })
 
 const DELIMETER = `;;;`
@@ -29,8 +29,6 @@ let applicationContexts = {}
 
 const writeData = (data) => {
 
-  // log(`writeData:`)
-  // log(data)
   try {
 
     port.write(data)
@@ -112,7 +110,14 @@ const handleData = (data) => {
 
 const cleanReturnValue = (returnValue) => {
 
-  return returnValue.replace(MESSAGE_DELIMITER_REGEX, REPLACEMENT_MESSAGE).replace(INNER_MESSAGE_DELIMITER_REGEX, INNER_REPLACEMENT_MESSAGE)
+  if (typeof returnValue === `object`) {
+
+    returnValue = JSON.stringify(returnValue)
+  }
+
+  returnValue = returnValue.replace(/[^\x00-\x7F]/g, "").replace(MESSAGE_DELIMITER_REGEX, REPLACEMENT_MESSAGE).replace(INNER_MESSAGE_DELIMITER_REGEX, INNER_REPLACEMENT_MESSAGE)
+
+  return returnValue
 }
 
 const evalOperand = async (APPLICATION_ID, CALL_ID, OPERAND) => {
@@ -150,7 +155,7 @@ const runFunction = async (APPLICATION_ID, CALL_ID, OPERAND) => {
 
   if (!applicationContexts[APPLICATION_ID][FUNCTION]) {
 
-    writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;FAILURE;;;FUNCTION NOT FOUND ON APPLICATION${MESSAGE_DELIMITER}`)
+    writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;FAILURE;;;FUNCTION NOT FOUND ON APPLICATION:${FUNCTION}${MESSAGE_DELIMITER}`)
 
     return
   }
@@ -168,6 +173,7 @@ const createDirectoryForApplication = async (APPLICATION_ID) => {
 
   await new Promise((resolve) => {
 
+    // rimraf is a deleter -- this should result in the directory being deleted
     return rimraf(`${__dirname}/${APPLICATION_ID}`, resolve);
   })
 
@@ -175,11 +181,6 @@ const createDirectoryForApplication = async (APPLICATION_ID) => {
 }
 
 const createFileForApplication = async (APPLICATION_ID, fileName, fileText) => {
-
-  // console.log(`fileName`)
-  // console.log(fileName)
-  // console.log(`fileText`)
-  // console.log(fileText)
 
   await fs.writeFile(`${__dirname}/${APPLICATION_ID}/${fileName.trim()}`, fileText)
 }
@@ -206,6 +207,8 @@ const runApplication = async (APPLICATION_ID, CALL_ID) => {
   };
 
   let applicationContext
+
+  delete applicationContexts[APPLICATION_ID]
 
   try {
 
