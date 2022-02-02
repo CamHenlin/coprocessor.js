@@ -217,6 +217,8 @@ const runApplication = async (APPLICATION_ID, CALL_ID) => {
     applicationContext = new application()
   } catch (err) {
 
+    console.log(err)
+
     writeData(`${APPLICATION_ID};;;${CALL_ID};;;PROGRAM;;;FAILURE;;;runApplication:${err.message}${MESSAGE_DELIMITER}`)
 
     return
