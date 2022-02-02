@@ -3,7 +3,7 @@
 TODO: docs already slightly out of date - this works now! update docs to explain how to use
 
 ## What is this?
-Coprocessor.js is a serial-based, nodejs-backed, remote code execution system. Coprocessor allows remote users connected via serial cable to send JavaScript packages over that serial port, and then interact with those packages via function calls or evaluations. This allows all development to stay on the remote side of the serial port.
+CoprocessorJS is a serial-based, nodejs-backed, remote code execution system. Coprocessor allows remote users connected via serial cable to send JavaScript packages over that serial port, and then interact with those packages via function calls or evaluations. This allows all development to stay on the remote side of the serial port.
 
 Coprocessor is intended to run on a host powerful enough to run modern node.js, like a raspberry pi, modern laptop, etc.
 
@@ -22,7 +22,6 @@ Sure, *old* Internet-connected apps still won't work using this strategy, but we
 ## Okay, I'm convinced! How do I use it?
 
 ### Get it running on the host machine
-WIP, needs expanded
 
 clone this repo:
 ```
@@ -39,6 +38,30 @@ then run it, note that your serial port may be different:
 ```
 SERIAL_PORT=/dev/ttys000 npm run server
 ```
+
+#### Finding your serial port
+If you're using a new USB to serial port adapter (maybe like the one I outlined [here](https://henlin.net/2021/12/21/Building-a-USB-to-RS422-cable-for-your-classic-Macintosh/)) you may not know what port you're running on. Here's an easy way to figure it out:
+
+In a new terminal window, with the USB portion of the cable unplugged from your host machine, run:
+
+```
+output1=$(ls /dev/tty*)
+```
+
+Then, plug in the USB portion of the cable to your host machine, and in the same terminal window, run:
+
+```
+output2=$(ls /dev/tty*)
+diff <(echo "$output1") <(echo "$output2")
+```
+
+This should output something that looks like:
+
+```
+> /dev/ttyUSB0
+```
+
+Which is your USB to serial cable!
 
 ### Now send things over the serial port
 WIP, provide example repo
@@ -110,7 +133,6 @@ TODO: provide a better example
 ## What's next
 This seems to work fine on a local test machine accepting fake commands at the bottom of `index.js`. Next step is to provide operational examples on the Retro68 side, then create a simple interaction library there.
 
-
 # Additional note about tty0tty for local testing
 copied from: https://www.sagunpandey.com/2016/02/setup-virtual-serial-ports-using-tty0tty-in-linux/
 Installing tty0tty:
@@ -141,3 +163,6 @@ Edit the file /etc/modules (Debian) or /etc/modules.conf and add the following l
 tty0tty
 
 Note that this method will not make the module persist over kernel updates so if you ever update your kernel, make sure you build tty0tty again and repeat the process.
+
+# Software using CoprocessorJS
+- [Messages for Macintosh](https://github.com/CamHenlin/MessagesForMacintosh)
