@@ -23,7 +23,7 @@ Sure, *old* Internet-connected apps still won't work using this strategy, but we
 
 clone this repo:
 ```
-git clone this repo
+git clone https://github.com/CamHenlin/coprocessor.js.git
 ```
 
 install it:
