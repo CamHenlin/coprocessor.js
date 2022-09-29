@@ -79,6 +79,7 @@ The third part will be
 
  - `PROGRAM` new program, this will result in a text transmission of an uninstalled plain text node app. After `npm install` is complete, a success response will be written back over the serial port
  - `FUNCTION` a function call to the loaded program for the loaded APPLICATION_ID. if a return value is present, it will be written back over the serial port
+ - `VFUNCTION` a function call to the loaded program for the loaded APPLICATION_ID. VFUNCTION will never return a value back to the serial port and is intended to be used to make async function calls and gather the results later via a `FUNCTION` call
  - `EVAL` eval a JS string in the context of the application. if a return value is present, it will be written back over the serial port
 
 The fourth part will be passed to the specific handler from part 3. this may be split by additional delimiters `&&&` and `@@@` - do not use these delimeters in your software

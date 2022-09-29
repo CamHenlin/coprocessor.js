@@ -31,6 +31,7 @@ const writeData = (data) => {
 
   try {
 
+    // log(`writing data: ${data}`)
     port.write(data)
   } catch (err) {}
 }
@@ -91,8 +92,12 @@ const handleData = (data) => {
       return instantiateProgram(APPLICATION_ID, CALL_ID, OPERAND)
 
     case `FUNCTION`:
-
+  
       return runFunction(APPLICATION_ID, CALL_ID, OPERAND)
+
+    case `VFUNCTION`:
+    
+      return runVoidFunction(APPLICATION_ID, CALL_ID, OPERAND)
 
     case `EVAL`:
 
@@ -165,6 +170,29 @@ const runFunction = async (APPLICATION_ID, CALL_ID, OPERAND) => {
   returnValue = cleanReturnValue(returnValue)
 
   writeData(`${APPLICATION_ID};;;${CALL_ID};;;FUNCTION;;;SUCCESS;;;${returnValue}${MESSAGE_DELIMITER}`)
+
+  return
+}
+
+const runVoidFunction = async (APPLICATION_ID, CALL_ID, OPERAND) => {
+
+  const splitOperand = OPERAND.split(FILE_OR_FUNCTION_DELIMETER)
+  const FUNCTION = splitOperand.shift()
+
+  // unfortunately it's not really safe to return anything to the serial port
+  // in this function because it would result in a value that is never read
+  // by the other machine
+  if (!applicationContexts[APPLICATION_ID]) {
+
+    return
+  }
+
+  if (!applicationContexts[APPLICATION_ID][FUNCTION]) {
+
+    return
+  }
+
+  await applicationContexts[APPLICATION_ID][FUNCTION](...splitOperand)
 
   return
 }
@@ -298,7 +326,7 @@ port.pipe(parser)
 parser.on('data', function (data) {
 
   // console.log(`PORT DATA LINE:`)
-  // console.log(data)
+  // console.log(new String(data))
   handleData(new String(data))
 })
 
